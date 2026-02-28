@@ -81,7 +81,9 @@ export default defineNuxtConfig({
 
     // 为客户端公开的部分配置
     public: {
-      appVersion: '1.0.0'
+      appVersion: '1.0.0',
+      supabaseUrl: process.env.PUBLIC_SUPABASE_URL,
+      supabaseKey: process.env.PUBLIC_SUPABASE_KEY
     }
   },
 
@@ -95,8 +97,7 @@ export default defineNuxtConfig({
   // 构建配置
   build: {
     transpile: ['pinia', '@pinia/nuxt']
-  },
+  }
 
-  // 禁用 SSR 以避免 Pinia 序列化问题
-  ssr: false
+  // 注意：保留默认的SSR设置以支持更广泛的场景
 })

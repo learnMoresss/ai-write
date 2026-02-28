@@ -77,44 +77,7 @@
       </UCard>
     </div>
 
-    <div class="mt-16">
-      <h2 class="text-2xl font-bold mb-8 text-center">创作流程</h2>
-
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div class="text-center">
-          <div class="mx-auto w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center mb-4">
-            <span class="text-primary-600 font-bold text-xl">1</span>
-          </div>
-          <h3 class="font-semibold mb-2">种子期</h3>
-          <p class="text-sm text-gray-600">输入简短背景概念，如"赛博朋克+修仙"</p>
-        </div>
-
-        <div class="text-center">
-          <div class="mx-auto w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center mb-4">
-            <span class="text-primary-600 font-bold text-xl">2</span>
-          </div>
-          <h3 class="font-semibold mb-2">基建期</h3>
-          <p class="text-sm text-gray-600">AI扩充世界观，生成人物关系拓扑图</p>
-        </div>
-
-        <div class="text-center">
-          <div class="mx-auto w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center mb-4">
-            <span class="text-primary-600 font-bold text-xl">3</span>
-          </div>
-          <h3 class="font-semibold mb-2">编排期</h3>
-          <p class="text-sm text-gray-600">生成故事线与触发器，规划情节发展</p>
-        </div>
-
-        <div class="text-center">
-          <div class="mx-auto w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center mb-4">
-            <span class="text-primary-600 font-bold text-xl">4</span>
-          </div>
-          <h3 class="font-semibold mb-2">生成期</h3>
-          <p class="text-sm text-gray-600">AI生成内容，通过审批角色校验质量</p>
-        </div>
-      </div>
-    </div>
-
+    <!-- 最近的故事列表保持不变 -->
     <div class="mt-16">
       <h2 class="text-2xl font-bold mb-8 text-center">近期故事</h2>
 
