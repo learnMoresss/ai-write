@@ -1,13 +1,14 @@
 import { chapterPath, readJson, type ChapterData, validateBookId } from '../../../../lib/storage'
+import { apiSuccess, apiError } from '../../../../utils/api-response'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
   const chapterId = getRouterParam(event, 'chapterId')
   if (!id || !validateBookId(id) || !chapterId) {
-    throw createError({ statusCode: 400, statusMessage: 'Invalid params' })
+    return apiError(400, 'Invalid params')
   }
 
   const chapter = await readJson<ChapterData | null>(chapterPath(id, chapterId), null)
-  if (!chapter) throw createError({ statusCode: 404, statusMessage: 'Chapter not found' })
-  return { data: chapter }
+  if (!chapter) return apiError(404, 'Chapter not found')
+  return apiSuccess(chapter)
 })

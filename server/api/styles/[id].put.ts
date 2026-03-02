@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { atomicWriteJson, readJson, stylesPath, type StylePreset } from '../../lib/storage'
+import { apiSuccess, apiError } from '../../utils/api-response'
 
 const schema = z.object({
   name: z.string().min(1).optional(),
@@ -11,20 +12,20 @@ const schema = z.object({
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
-  if (!id) throw createError({ statusCode: 400, statusMessage: 'Missing style id' })
+  if (!id) return apiError(400, 'Missing style id')
 
   const body = await readBody(event)
   const parsed = schema.safeParse(body)
   if (!parsed.success) {
-    throw createError({ statusCode: 400, statusMessage: parsed.error.issues.map(x => x.message).join(', ') })
+    return apiError(400, parsed.error.issues.map(x => x.message).join(', '))
   }
 
   const current = await readJson<StylePreset[]>(stylesPath, [])
   const index = current.findIndex(x => x.id === id)
-  if (index < 0) throw createError({ statusCode: 404, statusMessage: 'Style not found' })
+  if (index < 0) return apiError(404, 'Style not found')
 
   const existing = current[index]
-  if (!existing) throw createError({ statusCode: 404, statusMessage: 'Style not found' })
+  if (!existing) return apiError(404, 'Style not found')
   current[index] = {
     id: existing.id,
     name: parsed.data.name ?? existing.name,
@@ -38,5 +39,5 @@ export default defineEventHandler(async (event) => {
   }
 
   await atomicWriteJson(stylesPath, current)
-  return { data: current[index] }
+  return apiSuccess(current[index])
 })

@@ -1,6 +1,6 @@
 {
   "provider": "openai",
-  "model": "gpt-4o-mini",
-  "apiKeyMasked": "",
+  "model": "deepseek-v3-2-exp",
+  "apiKeyMasked": "sk-0yhAwK2msVn8GozI4lp56NSOS9qD5GuyEMqx28zY8dZhhypA",
   "theme": "light"
 }

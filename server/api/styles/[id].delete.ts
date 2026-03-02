@@ -1,13 +1,14 @@
-import { atomicWriteJson, readJson, stylesPath, type StylePreset } from '../../lib/storage'
+import { atomicWriteJson, readJson, stylesPath } from '../../lib/storage'
+import { apiSuccess, apiError } from '../../utils/api-response'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
-  if (!id) throw createError({ statusCode: 400, statusMessage: 'Missing style id' })
+  if (!id) return apiError(400, 'Missing style id')
 
-  const current = await readJson<StylePreset[]>(stylesPath, [])
-  const next = current.filter(x => x.id !== id)
-  if (next.length === current.length) throw createError({ statusCode: 404, statusMessage: 'Style not found' })
+  const current = await readJson(stylesPath, [])
+  const next = current.filter((x: { id: string }) => x.id !== id)
+  if (next.length === current.length) return apiError(404, 'Style not found')
 
   await atomicWriteJson(stylesPath, next)
-  return { data: { success: true } }
+  return apiSuccess({ success: true })
 })

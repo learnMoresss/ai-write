@@ -1,4 +1,5 @@
 import { listBooks } from '../../lib/storage'
+import { apiSuccess } from '../../utils/api-response'
 
 export default defineEventHandler(async () => {
   const books = await listBooks()
@@ -9,5 +10,5 @@ export default defineEventHandler(async () => {
     targetWords: book.targetWords,
     updatedAt: book.updatedAt
   }))
-  return { data }
+  return apiSuccess(data)
 })

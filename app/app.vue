@@ -16,7 +16,7 @@ useSeoMeta({
 <template>
   <div class="min-h-screen flex bg-slate-50 dark:bg-slate-950">
     <AppSidebar v-model:collapsed="sidebarCollapsed" />
-    <main class="flex-1 min-w-0 p-4 md:p-6 overflow-auto">
+    <main class="flex-1 min-w-0 overflow-auto">
       <NuxtPage />
     </main>
   </div>

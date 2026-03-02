@@ -1,9 +1,10 @@
 import { bookOutlinePath, chapterPath, readJson, type ChapterData, type OutlineNode, validateBookId } from '../../../lib/storage'
+import { apiSuccess, apiError } from '../../../utils/api-response'
 
 export default defineEventHandler(async (event) => {
   const id = getRouterParam(event, 'id')
   if (!id || !validateBookId(id)) {
-    throw createError({ statusCode: 400, statusMessage: 'Invalid book id' })
+    return apiError(400, 'Invalid book id')
   }
 
   const outline = await readJson<OutlineNode[]>(bookOutlinePath(id), [])
@@ -20,5 +21,5 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  return { data: { chapters } }
+  return apiSuccess({ chapters })
 })

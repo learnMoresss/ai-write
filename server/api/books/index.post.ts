@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { atomicWriteJson, bookLorePath, bookMetaPath, bookOutlinePath, createBookId, readJson, stylesPath, type BookMeta, type StylePreset } from '../../lib/storage'
 import { defaultLore } from '../../lib/book-engine'
+import { apiSuccess, apiError } from '../../utils/api-response'
 
 const schema = z.object({
   title: z.string().min(1),
@@ -16,7 +17,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const parsed = schema.safeParse(body)
   if (!parsed.success) {
-    throw createError({ statusCode: 400, statusMessage: parsed.error.issues.map(x => x.message).join(', ') })
+    return apiError(400, parsed.error.issues.map(x => x.message).join(', '))
   }
 
   const now = new Date().toISOString()
@@ -41,5 +42,5 @@ export default defineEventHandler(async (event) => {
   await atomicWriteJson(bookMetaPath(id), meta)
   await atomicWriteJson(bookLorePath(id), defaultLore())
   await atomicWriteJson(bookOutlinePath(id), [])
-  return { data: { id } }
+  return apiSuccess({ id })
 })

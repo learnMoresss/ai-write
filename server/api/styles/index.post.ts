@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { atomicWriteJson, readJson, stylesPath, type StylePreset } from '../../lib/storage'
+import { apiSuccess, apiError } from '../../utils/api-response'
 
 const schema = z.object({
   name: z.string().min(1),
@@ -13,7 +14,7 @@ export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const parsed = schema.safeParse(body)
   if (!parsed.success) {
-    throw createError({ statusCode: 400, statusMessage: parsed.error.issues.map(x => x.message).join(', ') })
+    return apiError(400, parsed.error.issues.map(x => x.message).join(', '))
   }
 
   const current = await readJson<StylePreset[]>(stylesPath, [])
@@ -28,5 +29,5 @@ export default defineEventHandler(async (event) => {
   }
 
   await atomicWriteJson(stylesPath, next)
-  return { data: item }
+  return apiSuccess(item)
 })
