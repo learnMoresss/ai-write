@@ -1,0 +1,41 @@
+[
+  {
+    "chapterId": "ch_001",
+    "chapterTitle": "第一章：风起之夜",
+    "chapterContentOutline": "主角第一次直面异常事件，意识到主线冲突已经启动，并留下第一层悬念。",
+    "characters": [
+      "主角"
+    ],
+    "clues": [
+      "初始核心伏笔"
+    ],
+    "status": "locked"
+  },
+  {
+    "chapterId": "ch_002",
+    "chapterTitle": "第二章：暗潮试探",
+    "chapterContentOutline": "核心势力第一次介入，主角做出代价型选择，冲突从个人扩展到组织层面。",
+    "characters": [
+      "主角",
+      "关键配角"
+    ],
+    "clues": [
+      "旧伏笔推进"
+    ],
+    "status": "locked"
+  },
+  {
+    "chapterId": "ch_003",
+    "chapterTitle": "第三章：线索反噬",
+    "chapterContentOutline": "伏笔出现反向解释，抛出更大悬念，为下一轮三章滚动规划留下断点。",
+    "characters": [
+      "主角",
+      "关键配角",
+      "潜在对手"
+    ],
+    "clues": [
+      "新伏笔埋设"
+    ],
+    "status": "locked"
+  }
+]

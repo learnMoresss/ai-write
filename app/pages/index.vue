@@ -1,201 +1,159 @@
-<!-- pages/index.vue -->
+<script setup lang="ts">
+type BookSummary = {
+  id: string
+  title: string
+  genre: string
+  targetWords: number
+  updatedAt: string
+}
+
+const books = ref<BookSummary[]>([])
+const loading = ref(false)
+const creating = ref(false)
+
+const form = reactive({
+  title: '',
+  oneLiner: '',
+  genre: '',
+  readers: '',
+  targetWords: 120000,
+  pace: 'normal',
+  styleId: ''
+})
+
+const errors = reactive<Record<string, string>>({})
+
+const paceOptions = [
+  { label: '快节奏', value: 'fast' },
+  { label: '标准节奏', value: 'normal' },
+  { label: '慢节奏', value: 'slow' }
+]
+
+const validateForm = () => {
+  errors.title = form.title.trim() ? '' : '请填写书名'
+  errors.genre = form.genre.trim() ? '' : '请填写题材'
+  errors.oneLiner = form.oneLiner.trim() ? '' : '请填写一句话核心梗'
+  errors.readers = form.readers.trim() ? '' : '请填写目标读者'
+  errors.targetWords = Number(form.targetWords) > 0 ? '' : '预期字数必须大于 0'
+  errors.pace = form.pace.trim() ? '' : '请选择节奏偏好'
+  return !Object.values(errors).some(Boolean)
+}
+
+const fetchBooks = async () => {
+  loading.value = true
+  try {
+    const result = await $fetch<{ data: BookSummary[] }>('/api/books')
+    books.value = result.data
+  } finally {
+    loading.value = false
+  }
+}
+
+const createBook = async () => {
+  if (!validateForm()) return
+  creating.value = true
+  try {
+    const token = localStorage.getItem('fake_token') || 'dev-token'
+    const created = await $fetch<{ data: { id: string } }>('/api/books', {
+      method: 'POST',
+      headers: { 'x-fake-token': token },
+      body: form
+    })
+    await fetchBooks()
+    await navigateTo(`/books/${created.data.id}/workspace`)
+  } finally {
+    creating.value = false
+  }
+}
+
+onMounted(fetchBooks)
+
+useSeoMeta({ title: '首页 | Books' })
+</script>
+
 <template>
-  <div class="container mx-auto px-4 py-8">
-    <UPageHero>
-      <template #title>
-        AI 小说创作平台
-      </template>
-      <template #description>
-        利用人工智能技术辅助创作逻辑严密的长篇小说，从概念到成品一站式解决方案
-      </template>
-    </UPageHero>
+  <div class="max-w-6xl mx-auto space-y-6">
+    <section class="rounded-xl border border-slate-200 dark:border-slate-800 p-5 bg-white dark:bg-slate-950">
+      <h1 class="text-2xl font-semibold">书籍管理</h1>
+      <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">创建向导只做地基，不提前透支章节大纲。</p>
+    </section>
 
-    <div class="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
-      <UCard>
-        <template #header>
-          <div class="flex items-center space-x-3">
-            <UIcon name="i-heroicons-rocket-launch" class="w-6 h-6 text-primary-500" />
-            <h3 class="text-lg font-semibold">快速开始</h3>
+    <section class="rounded-xl border border-slate-200 dark:border-slate-800 p-5 bg-white dark:bg-slate-950 space-y-3">
+      <h2 class="text-lg font-medium">创建向导</h2>
+      <form class="space-y-4" @submit.prevent="createBook">
+        <div class="grid md:grid-cols-2 gap-3">
+          <div class="space-y-1">
+            <label class="text-sm text-slate-700 dark:text-slate-300">书名</label>
+            <UInput v-model="form.title" placeholder="例如：星海归墟" />
+            <p v-if="errors.title" class="text-xs text-red-500">{{ errors.title }}</p>
           </div>
-        </template>
 
-        <p class="text-gray-600 mb-4">
-          输入简单的背景概念，AI将为您生成完整的世界观、人物关系和剧情大纲
-        </p>
+          <div class="space-y-1">
+            <label class="text-sm text-slate-700 dark:text-slate-300">题材</label>
+            <UInput v-model="form.genre" placeholder="例如：玄幻 / 科幻" />
+            <p v-if="errors.genre" class="text-xs text-red-500">{{ errors.genre }}</p>
+          </div>
 
-        <UButton
-          to="/stories/create"
-          color="primary"
-          class="w-full"
+          <div class="space-y-1 md:col-span-2">
+            <label class="text-sm text-slate-700 dark:text-slate-300">一句话核心梗</label>
+            <UInput v-model="form.oneLiner" placeholder="主角在濒死回档中追查世界真相" />
+            <p v-if="errors.oneLiner" class="text-xs text-red-500">{{ errors.oneLiner }}</p>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-sm text-slate-700 dark:text-slate-300">目标读者</label>
+            <UInput v-model="form.readers" placeholder="例如：男频成长向" />
+            <p v-if="errors.readers" class="text-xs text-red-500">{{ errors.readers }}</p>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-sm text-slate-700 dark:text-slate-300">预期字数</label>
+            <UInput v-model.number="form.targetWords" type="number" placeholder="120000" />
+            <p v-if="errors.targetWords" class="text-xs text-red-500">{{ errors.targetWords }}</p>
+          </div>
+
+          <div class="space-y-1">
+            <label class="text-sm text-slate-700 dark:text-slate-300">节奏偏好</label>
+            <select
+              v-model="form.pace"
+              class="w-full h-10 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 px-3 text-sm"
+            >
+              <option v-for="option in paceOptions" :key="option.value" :value="option.value">
+                {{ option.label }}
+              </option>
+            </select>
+            <p v-if="errors.pace" class="text-xs text-red-500">{{ errors.pace }}</p>
+          </div>
+        </div>
+
+        <button
+          type="submit"
+          :disabled="creating"
+          class="h-10 px-4 rounded-md bg-teal-600 text-white text-sm disabled:opacity-60"
         >
-          开始新故事
-        </UButton>
-      </UCard>
+          {{ creating ? '创建中...' : '创建并进入工作台' }}
+        </button>
+      </form>
+    </section>
 
-      <UCard>
-        <template #header>
-          <div class="flex items-center space-x-3">
-            <UIcon name="i-heroicons-rectangle-stack" class="w-6 h-6 text-primary-500" />
-            <h3 class="text-lg font-semibold">实体关系图</h3>
-          </div>
-        </template>
-
-        <p class="text-gray-600 mb-4">
-          可视化的人物、地点、物品关系图谱，助您理清复杂的故事线
-        </p>
-
-        <UButton
-          to="/ai-tools/entity-graph"
-          color="primary"
-          class="w-full"
-          variant="outline"
+    <section class="rounded-xl border border-slate-200 dark:border-slate-800 p-5 bg-white dark:bg-slate-950">
+      <h2 class="text-lg font-medium mb-3">书籍列表</h2>
+      <div v-if="loading" class="text-sm text-slate-500">加载中...</div>
+      <div v-else-if="books.length === 0" class="text-sm text-slate-500">暂无书籍</div>
+      <div v-else class="space-y-2">
+        <NuxtLink
+          v-for="book in books"
+          :key="book.id"
+          :to="`/books/${book.id}/workspace`"
+          class="block rounded-md border border-slate-200 dark:border-slate-800 p-3 hover:bg-slate-50 dark:hover:bg-slate-900"
         >
-          查看关系图
-        </UButton>
-      </UCard>
-
-      <UCard>
-        <template #header>
-          <div class="flex items-center space-x-3">
-            <UIcon name="i-heroicons-sparkles" class="w-6 h-6 text-primary-500" />
-            <h3 class="text-lg font-semibold">AI 优化器</h3>
+          <div class="flex items-center justify-between">
+            <p class="font-medium">{{ book.title }}</p>
+            <p class="text-xs text-slate-500">{{ new Date(book.updatedAt).toLocaleDateString('zh-CN') }}</p>
           </div>
-        </template>
-
-        <p class="text-gray-600 mb-4">
-          基于您的创意输入，智能优化世界观细节和剧情发展
-        </p>
-
-        <UButton
-          to="/ai-tools/world-builder"
-          color="primary"
-          class="w-full"
-          variant="outline"
-        >
-          优化世界观
-        </UButton>
-      </UCard>
-    </div>
-
-    <!-- 最近的故事列表保持不变 -->
-    <div class="mt-16">
-      <h2 class="text-2xl font-bold mb-8 text-center">近期故事</h2>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <UCard v-for="story in recentStories" :key="story.id">
-          <div>
-            <h3 class="font-bold text-lg mb-2">{{ story.title }}</h3>
-            <p class="text-gray-600 text-sm mb-4">{{ story.description }}</p>
-
-            <div class="flex justify-between items-center text-xs">
-              <span :class="getStatusClass(story.status)">
-                {{ getStatusText(story.status) }}
-              </span>
-              <span>{{ formatDate(story.updatedAt) }}</span>
-            </div>
-          </div>
-
-          <template #footer>
-            <div class="flex space-x-2">
-              <UButton
-                size="sm"
-                color="primary"
-                class="flex-1"
-                :to="`/stories/${story.id}`"
-              >
-                继续编辑
-              </UButton>
-              <UButton
-                size="sm"
-                color="gray"
-                variant="ghost"
-                @click="viewStory(story.id)"
-              >
-                预览
-              </UButton>
-            </div>
-          </template>
-        </UCard>
+          <p class="text-xs text-slate-500 mt-1">{{ book.genre }} · 目标 {{ book.targetWords.toLocaleString() }} 字</p>
+        </NuxtLink>
       </div>
-    </div>
+    </section>
   </div>
 </template>
-
-<script setup lang="ts">
-import { useStoryStore } from '~/stores/story'
-
-const storyStore = useStoryStore()
-
-// 模拟最近的故事数据（实际应用中应该从store获取）
-const recentStories = computed(() => {
-  if (storyStore.stories.length > 0) {
-    return storyStore.stories.slice(0, 3)
-  }
-
-  // 默认显示示例故事
-  return [
-    {
-      id: 'demo-1',
-      title: '赛博修仙传',
-      description: '在高科技与古老修仙并存的世界中，一个普通程序员意外踏入修仙之路...',
-      status: 'in-progress',
-      updatedAt: new Date(Date.now() - 24 * 60 * 60 * 1000)
-    },
-    {
-      id: 'demo-2',
-      title: '星辰魔法师',
-      description: '魔法与科技碰撞的宇宙，年轻魔法师探索星际奥秘的冒险之旅...',
-      status: 'draft',
-      updatedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000)
-    },
-    {
-      id: 'demo-3',
-      title: '古代机械师',
-      description: '架空古代世界中，一名拥有现代机械知识的穿越者引发的技术革命...',
-      status: 'completed',
-      updatedAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-    }
-  ]
-})
-
-// 获取状态文本
-const getStatusText = (status: string) => {
-  const statusMap: Record<string, string> = {
-    draft: '草稿',
-    'in-progress': '进行中',
-    completed: '已完成'
-  }
-  return statusMap[status] || status
-}
-
-// 获取状态样式类
-const getStatusClass = (status: string) => {
-  const classMap: Record<string, string> = {
-    draft: 'text-yellow-600 bg-yellow-100',
-    'in-progress': 'text-blue-600 bg-blue-100',
-    completed: 'text-green-600 bg-green-100'
-  }
-  return `inline-block px-2 py-1 rounded ${classMap[status]}`
-}
-
-// 格式化日期
-const formatDate = (date: Date) => {
-  return new Date(date).toLocaleDateString('zh-CN', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric'
-  })
-}
-
-// 查看故事
-const viewStory = (id: string) => {
-  console.log(`预览故事: ${id}`)
-  // 在实际应用中，这里可能会打开一个预览窗口
-}
-
-// 设置页面标题
-useSeoMeta({
-  title: 'AI 小说创作平台',
-  description: '利用人工智能技术辅助创作逻辑严密的长篇小说'
-})
-</script>
